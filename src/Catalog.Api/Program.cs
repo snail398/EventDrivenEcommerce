@@ -1,5 +1,5 @@
 using Catalog.Api.Data;
-using Catalog.Api.DTO.Products;
+using Catalog.Api.Endpoints;
 using Catalog.Api.Repositories;
 using Catalog.Api.Services;
 using Microsoft.EntityFrameworkCore;
@@ -30,37 +30,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var apiV1 = app.MapGroup("/api/v1");
-
-apiV1.MapGet("/products", async (ProductService service, CancellationToken cancellationToken) =>
-{
-    var products = await service.GetAllAsync(cancellationToken);
-    return Results.Ok(products);
-});
-
-apiV1.MapGet("/products/{id:guid}", async (Guid id, ProductService service, CancellationToken cancellationToken) =>
-{
-    var product = await service.GetByIdAsync(id, cancellationToken);
-
-    return product is null ? Results.NotFound() : Results.Ok(product);
-});
-
-apiV1.MapPost("/products", async (CreateProductRequest request, ProductService service, CancellationToken cancellationToken) =>
-{
-    var product = await service.CreateAsync(request, cancellationToken);
-    return Results.Created($"/api/v1/products/{product.Id}", product);
-});
-
-apiV1.MapPut("/products/{id:guid}", async (Guid id, UpdateProductRequest request, ProductService service, CancellationToken cancellationToken) =>
-{
-    var updated = await service.UpdateAsync(id, request, cancellationToken);
-    return updated ? Results.NoContent() : Results.NotFound();
-});
-
-apiV1.MapDelete("/products/{id:guid}", async (Guid id, ProductService service, CancellationToken cancellationToken) =>
-{
-    var deleted = await service.DeleteAsync(id, cancellationToken);
-    return deleted ? Results.NoContent() : Results.NotFound();
-});
+app.MapProductEndpoints();
 
 app.Run();
