@@ -1,6 +1,29 @@
 @Catalog.Api_HostAddress = http://localhost:5086
+@Catalog.Api_version = api/v1
 
-GET {{Catalog.Api_HostAddress}}/weatherforecast/
+GET {{Catalog.Api_HostAddress}}/{{Catalog.Api_version}}/products
 Accept: application/json
+###
 
+POST {{Catalog.Api_HostAddress}}/{{Catalog.Api_version}}/products
+Content-Type: application/json
+
+{
+  "name": "Laptop Stand",
+  "description": "Aluminium adjustable stand",
+  "price": 49.99
+}
+###
+
+PUT {{Catalog.Api_HostAddress}}/{{Catalog.Api_version}}/products/{id}
+Content-Type: application/json
+
+{
+  "name": "Updated name",
+  "description": "Updated description",
+  "price": 99.99
+}
+###
+
+DELETE {{Catalog.Api_HostAddress}}/{{Catalog.Api_version}}/products/{id}
 ###
