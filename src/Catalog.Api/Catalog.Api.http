@@ -9,7 +9,7 @@ POST {{Catalog.Api_HostAddress}}/{{Catalog.Api_version}}/products
 Content-Type: application/json
 
 {
-  "name": "Laptop Stand",
+  "name": "Laptop Stand32312",
   "description": "Aluminium adjustable stand",
   "price": 49.99
 }

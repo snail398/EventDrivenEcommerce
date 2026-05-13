@@ -1,10 +1,14 @@
 using Catalog.Api.Data;
 using Catalog.Api.Endpoints;
+using Catalog.Api.Messaging;
 using Catalog.Api.Repositories;
 using Catalog.Api.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetSection("RabbitMq"));
+builder.Services.AddSingleton<RabbitMqPublisher>();
 
 builder.Services.AddDbContext<CatalogDbContext>(options =>
 {

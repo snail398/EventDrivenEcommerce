@@ -1,4 +1,6 @@
 using Catalog.Api.DTO.Products;
+using Catalog.Api.Messaging;
+using Catalog.Api.Messaging.Events;
 using Catalog.Api.Models;
 using Catalog.Api.Repositories;
 
@@ -7,10 +9,12 @@ namespace Catalog.Api.Services;
 public sealed class ProductService
 {
     private readonly IProductRepository _productRepository;
+    private readonly RabbitMqPublisher _publisher;
 
-    public ProductService(IProductRepository productRepository)
+    public ProductService(IProductRepository productRepository, RabbitMqPublisher publisher)
     {
         _productRepository = productRepository;
+        _publisher = publisher;
     }
 
     public Task<IReadOnlyCollection<Product>> GetAllAsync(CancellationToken cancellationToken)
@@ -27,6 +31,10 @@ public sealed class ProductService
     {
         var product = new Product(Guid.NewGuid(), request.Name, request.Description, request.Price);
         await _productRepository.AddAsync(product, cancellationToken);
+
+        var @event = new ProductCreatedEvent(product.Id, product.Name, product.Price);
+        await _publisher.PublishAsync("catalog.events", "product.created", @event, cancellationToken);
+
         return product;
     }
 
