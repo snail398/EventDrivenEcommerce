@@ -1,8 +1,8 @@
 using Catalog.Api.DTO.Products;
 using Catalog.Api.Messaging;
-using Catalog.Api.Messaging.Events;
 using Catalog.Api.Models;
 using Catalog.Api.Repositories;
+using Shared.Contracts.Events;
 
 namespace Catalog.Api.Services;
 

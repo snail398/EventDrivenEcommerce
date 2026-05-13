@@ -1,3 +1,3 @@
-namespace Catalog.Api.Messaging.Events;
+namespace Shared.Contracts.Events;
 
 public sealed record ProductCreatedEvent(Guid Id, string Name, decimal Price);

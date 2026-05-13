@@ -1,5 +1,8 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Catalog.Api/Catalog.Api.csproj" />
+    <Project Path="src/Notification.Api/Notification.Api.csproj" />
+    <Project Path="src/Shared.Contracts/Shared.Contracts.csproj" />
+    <Project Path="src/Shared.Messaging/Shared.Messaging.csproj" />
   </Folder>
 </Solution>

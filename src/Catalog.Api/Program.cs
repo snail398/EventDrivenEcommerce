@@ -4,6 +4,7 @@ using Catalog.Api.Messaging;
 using Catalog.Api.Repositories;
 using Catalog.Api.Services;
 using Microsoft.EntityFrameworkCore;
+using Shared.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
 
