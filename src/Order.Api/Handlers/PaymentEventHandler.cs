@@ -17,12 +17,12 @@ public sealed class PaymentEventHandler
     public async Task HandleAsync(PaymentSucceededEvent message, CancellationToken cancellationToken)
     {
         await _orderService.ConfirmAsync(message.OrderId, cancellationToken);
-        _logger.LogInformation($"[Order] Order confirmed: {message.OrderId}");
+        _logger.LogInformation("Order confirmed: {OrderId}. CorrelationId: {CorrelationId}", message.OrderId, message.CorrelationId);
     }
 
     public async Task HandleAsync(PaymentFailedEvent message, CancellationToken cancellationToken)
     {
         await _orderService.FailAsync(message.OrderId, cancellationToken);
-        _logger.LogInformation($"[Order] Order failed: {message.OrderId}. Reason: {message.Reason}");
+        _logger.LogInformation("Order failed: {OrderId}. Reason: {Reason}. CorrelationId: {CorrelationId}", message.OrderId, message.Reason, message.CorrelationId);
     }
 }

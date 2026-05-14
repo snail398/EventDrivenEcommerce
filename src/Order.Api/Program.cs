@@ -4,6 +4,7 @@ using Order.Api.Consumers;
 using Order.Api.Data;
 using Order.Api.Endpoints;
 using Order.Api.Handlers;
+using Order.Api.Middleware;
 using Order.Api.Repositories;
 using Order.Api.Services;
 using Order.Api.Workers;
@@ -17,7 +18,7 @@ builder.Host.UseSerilog((context, configuration) =>
 {
     configuration
         .ReadFrom.Configuration(context.Configuration)
-        .WriteTo.Console();
+        .Enrich.FromLogContext();
 });
 
 builder.Services.AddDbContext<OrderDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres")));
@@ -64,6 +65,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseMiddleware<CorrelationIdMiddleware>();
+
 app.MapOrderEndpoints();
 app.MapHealthChecks("/health");
 

@@ -2,6 +2,7 @@
 
 POST {{Order.Api_HostAddress}}/api/v1/orders
 Content-Type: application/json
+X-Correlation-Id: test-correlation-123
 
 {
   "productId": "11111111-2222-1111-1111-111111111111",

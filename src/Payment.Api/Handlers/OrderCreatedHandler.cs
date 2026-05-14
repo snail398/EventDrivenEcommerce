@@ -20,13 +20,13 @@ public sealed class OrderCreatedHandler
 
         if (paymentSucceeded)
         {
-            var @event = new PaymentSucceededEvent(message.OrderId);
+            var @event = new PaymentSucceededEvent(message.OrderId, message.CorrelationId);
             await _publisher.PublishAsync("payment.events", "payment.succeeded", @event, cancellationToken);
             _logger.LogInformation("Payment succeeded for order {OrderId}", message.OrderId);
             return;
         }
 
-        var failedEvent = new PaymentFailedEvent(message.OrderId, "Payment was declined.");
+        var failedEvent = new PaymentFailedEvent(message.OrderId, "Payment was declined.", message.CorrelationId);
         await _publisher.PublishAsync("payment.events", "payment.failed", failedEvent, cancellationToken);
         _logger.LogInformation("Payment failed for order {OrderId}", message.OrderId);
     }

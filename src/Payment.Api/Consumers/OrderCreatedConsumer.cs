@@ -5,6 +5,7 @@ using Payment.Api.Handlers;
 using Payment.Api.Messaging.Configuration;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using Serilog.Context;
 using Shared.Contracts.Events;
 using Shared.Messaging;
 
@@ -43,11 +44,14 @@ public sealed class OrderCreatedConsumer : BackgroundService
 
                 if (message is null) throw new InvalidOperationException("OrderCreatedEvent deserialization failed.");
 
-                using var scope = _scopeFactory.CreateScope();
-                var handler = scope.ServiceProvider.GetRequiredService<OrderCreatedHandler>();
+                using (LogContext.PushProperty("CorrelationId", message.CorrelationId))
+                {
+                    using var scope = _scopeFactory.CreateScope();
+                    var handler = scope.ServiceProvider.GetRequiredService<OrderCreatedHandler>();
 
-                await handler.HandleAsync(message, stoppingToken);
-                await channel.BasicAckAsync(args.DeliveryTag, false, stoppingToken);
+                    await handler.HandleAsync(message, stoppingToken);
+                    await channel.BasicAckAsync(args.DeliveryTag, false, stoppingToken);
+                }
             }
             catch (Exception ex)
             {

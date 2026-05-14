@@ -3,6 +3,7 @@ using Order.Api.DTO.Orders;
 using Order.Api.Models;
 using Order.Api.Services;
 using Microsoft.EntityFrameworkCore;
+using Order.Api.Middleware;
 
 namespace Order.Api.Endpoints;
 
@@ -12,9 +13,10 @@ public static class OrderEndpoints
     {
         var group = app.MapGroup("/api/v1/orders");
 
-        group.MapPost("/", async (CreateOrderRequest request, OrderService service, CancellationToken cancellationToken) =>
+        group.MapPost("/", async (CreateOrderRequest request, HttpContext httpContext, OrderService service, CancellationToken cancellationToken) =>
         {
-            var order = await service.CreateAsync(request, cancellationToken);
+            var correlationId = httpContext.Items[CorrelationIdMiddleware.HeaderName]?.ToString() ?? Guid.NewGuid().ToString();
+            var order = await service.CreateAsync(request, correlationId, cancellationToken);
             return Results.Created($"/api/v1/orders/{order.Id}", ToResponse(order));
         });
 

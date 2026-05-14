@@ -15,7 +15,7 @@ public sealed class OrderService
         _orderRepository = orderRepository;
     }
 
-    public async Task<CustomerOrder> CreateAsync(CreateOrderRequest request, CancellationToken cancellationToken)
+    public async Task<CustomerOrder> CreateAsync(CreateOrderRequest request, string correlationId, CancellationToken cancellationToken)
     {
         var order = new CustomerOrder
         {
@@ -28,7 +28,7 @@ public sealed class OrderService
             Status = OrderStatus.Created
         };
 
-        var @event = new OrderCreatedEvent(order.Id, order.ProductId, order.Quantity, order.UnitPrice);
+        var @event = new OrderCreatedEvent(order.Id, order.ProductId, order.Quantity, order.UnitPrice, correlationId);
 
         var outboxMessage = new OutboxMessage
         {

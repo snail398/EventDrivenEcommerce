@@ -5,6 +5,7 @@ using Order.Api.Handlers;
 using Order.Api.Messaging.Configuration;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using Serilog.Context;
 using Shared.Contracts.Events;
 using Shared.Messaging;
 
@@ -46,12 +47,18 @@ public sealed class PaymentEventConsumer : BackgroundService
                 if (args.RoutingKey == RabbitMqTopology.PaymentSucceededRoutingKey)
                 {
                     var message = JsonSerializer.Deserialize<PaymentSucceededEvent>(json) ?? throw new InvalidOperationException("PaymentSucceededEvent deserialization failed.");
-                    await handler.HandleAsync(message, stoppingToken);
+                    using (LogContext.PushProperty("CorrelationId", message.CorrelationId))
+                    {
+                        await handler.HandleAsync(message, stoppingToken);
+                    }
                 }
                 else if (args.RoutingKey == RabbitMqTopology.PaymentFailedRoutingKey)
                 {
                     var message = JsonSerializer.Deserialize<PaymentFailedEvent>(json) ?? throw new InvalidOperationException("PaymentFailedEvent deserialization failed.");
-                    await handler.HandleAsync(message, stoppingToken);
+                    using (LogContext.PushProperty("CorrelationId", message.CorrelationId))
+                    {
+                        await handler.HandleAsync(message, stoppingToken);
+                    }
                 }
 
                 await channel.BasicAckAsync(args.DeliveryTag, false, stoppingToken);
