@@ -11,3 +11,5 @@ Content-Type: application/json
 ###
 
 GET {{Order.Api_HostAddress}}/api/v1/orders/5169c62c-886a-4171-a29b-511717d86b71
+
+GET {{Order.Api_HostAddress}}/api/v1/orders/debug/outbox

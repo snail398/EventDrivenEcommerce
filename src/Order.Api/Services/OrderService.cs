@@ -1,20 +1,18 @@
+using System.Text.Json;
 using Order.Api.DTO.Orders;
 using Order.Api.Models;
 using Order.Api.Repositories;
 using Shared.Contracts.Events;
-using Shared.Messaging;
 
 namespace Order.Api.Services;
 
 public sealed class OrderService
 {
     private readonly IOrderRepository _orderRepository;
-    private readonly RabbitMqPublisher _publisher;
 
-    public OrderService(IOrderRepository orderRepository, RabbitMqPublisher publisher)
+    public OrderService(IOrderRepository orderRepository)
     {
         _orderRepository = orderRepository;
-        _publisher = publisher; 
     }
 
     public async Task<CustomerOrder> CreateAsync(CreateOrderRequest request, CancellationToken cancellationToken)
@@ -25,12 +23,24 @@ public sealed class OrderService
             ProductId = request.ProductId,
             Quantity = request.Quantity,
             UnitPrice = request.UnitPrice,
+            TotalPrice = request.Quantity * request.UnitPrice,
+            CreatedOnUtc = DateTime.UtcNow,
             Status = OrderStatus.Created
         };
-        await _orderRepository.AddAsync(order, cancellationToken);
 
         var @event = new OrderCreatedEvent(order.Id, order.ProductId, order.Quantity, order.UnitPrice);
-        await _publisher.PublishAsync("order.events", "order.created", @event, cancellationToken);
+
+        var outboxMessage = new OutboxMessage
+        {
+            Id = Guid.NewGuid(),
+            Type = nameof(OrderCreatedEvent),
+            Content = JsonSerializer.Serialize(@event),
+            Exchange = "order.events",
+            RoutingKey = "order.created",
+            OccurredOnUtc = DateTime.UtcNow
+        };
+
+        await _orderRepository.AddWithOutboxMessageAsync(order, outboxMessage, cancellationToken);
         return order;
     }
 
@@ -39,6 +49,12 @@ public sealed class OrderService
         var order = await _orderRepository.GetByIdAsync(orderId, cancellationToken);
         if (order is null) return;
 
+        if (order.Status is OrderStatus.Confirmed or OrderStatus.Failed)
+        {
+            return;
+        }
+
+        order.UpdatedOnUtc = DateTime.UtcNow;
         order.Status = OrderStatus.Confirmed;
         await _orderRepository.UpdateAsync(order, cancellationToken);
     }
@@ -48,6 +64,11 @@ public sealed class OrderService
         var order = await _orderRepository.GetByIdAsync(orderId, cancellationToken);
         if (order is null) return;
 
+        if (order.Status is OrderStatus.Confirmed or OrderStatus.Failed)
+        {
+            return;
+        }
+        order.UpdatedOnUtc = DateTime.UtcNow;
         order.Status = OrderStatus.Failed;
         await _orderRepository.UpdateAsync(order, cancellationToken);
     }

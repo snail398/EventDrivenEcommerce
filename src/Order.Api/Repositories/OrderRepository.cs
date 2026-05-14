@@ -20,6 +20,14 @@ public sealed class OrderRepository : IOrderRepository
         return order;
     }
 
+    public async Task AddWithOutboxMessageAsync(CustomerOrder order, OutboxMessage outboxMessage, CancellationToken cancellationToken)
+    {
+        _dbContext.Orders.Add(order);
+        _dbContext.OutboxMessages.Add(outboxMessage);
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task<CustomerOrder?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         return await _dbContext.Orders.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);

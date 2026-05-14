@@ -28,6 +28,17 @@ public sealed class RabbitMqPublisher : IAsyncDisposable
         await channel.BasicPublishAsync(exchange, routingKey, body, cancellationToken);
     }
 
+    public async Task PublishRawAsync(string exchange, string routingKey, string json, CancellationToken cancellationToken)
+    {
+        var channel = await GetChannelAsync(cancellationToken);
+
+        await channel.ExchangeDeclareAsync(exchange, ExchangeType.Topic, durable: true, cancellationToken: cancellationToken);
+
+        var body = Encoding.UTF8.GetBytes(json);
+
+        await channel.BasicPublishAsync(exchange, routingKey, body, cancellationToken);
+    }
+
     private async Task<IChannel> GetChannelAsync(CancellationToken cancellationToken)
     {
         if (_channel is not null)
