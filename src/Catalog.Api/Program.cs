@@ -1,6 +1,5 @@
 using Catalog.Api.Data;
 using Catalog.Api.Endpoints;
-using Catalog.Api.Messaging;
 using Catalog.Api.Repositories;
 using Catalog.Api.Services;
 using Microsoft.EntityFrameworkCore;
