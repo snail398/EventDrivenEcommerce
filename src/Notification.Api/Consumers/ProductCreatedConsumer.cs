@@ -17,13 +17,15 @@ public sealed class ProductCreatedConsumer : BackgroundService
     private readonly RabbitMqRetryService _retryService;
     private readonly RabbitMqOptions _rabbitMqOptions;
     private readonly RabbitMqTopologyInitializer _topologyInitializer;
+    private readonly ILogger<ProductCreatedConsumer> _logger;
 
-    public ProductCreatedConsumer(IServiceScopeFactory scopeFactory, RabbitMqRetryService retryService, IOptions<RabbitMqOptions> rabbitMqOptions, RabbitMqTopologyInitializer topologyInitializer)
+    public ProductCreatedConsumer(IServiceScopeFactory scopeFactory, RabbitMqRetryService retryService, IOptions<RabbitMqOptions> rabbitMqOptions, RabbitMqTopologyInitializer topologyInitializer, ILogger<ProductCreatedConsumer> logger)
     {
         _scopeFactory = scopeFactory;
         _retryService = retryService;
         _topologyInitializer = topologyInitializer;
         _rabbitMqOptions = rabbitMqOptions.Value;
+        _logger = logger;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -55,7 +57,7 @@ public sealed class ProductCreatedConsumer : BackgroundService
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[Notification] Error: {ex.Message}");
+                _logger.LogError(ex, "[Notification] Error: {Message}", ex.Message);
                 await _retryService.HandleFailureAsync(channel, args, stoppingToken); 
             }
         };

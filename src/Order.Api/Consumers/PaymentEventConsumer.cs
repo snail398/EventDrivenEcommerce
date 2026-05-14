@@ -14,11 +14,13 @@ public sealed class PaymentEventConsumer : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly RabbitMqOptions _rabbitMqOptions;
+    private readonly ILogger<PaymentEventConsumer> _logger;
 
-    public PaymentEventConsumer(IServiceScopeFactory scopeFactory, IOptions<RabbitMqOptions> rabbitMqOptions)
+    public PaymentEventConsumer(IServiceScopeFactory scopeFactory, IOptions<RabbitMqOptions> rabbitMqOptions, ILogger<PaymentEventConsumer> logger)
     {
         _scopeFactory = scopeFactory;
         _rabbitMqOptions = rabbitMqOptions.Value;
+        _logger = logger;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -56,7 +58,7 @@ public sealed class PaymentEventConsumer : BackgroundService
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[Order] Payment event error: {ex.Message}");
+                _logger.LogError(ex, $"[Order] Payment event error: {ex.Message}");
                 await channel.BasicNackAsync(args.DeliveryTag, false, requeue: false, stoppingToken);
             }
         };

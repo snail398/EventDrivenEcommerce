@@ -3,9 +3,15 @@ using Notification.Api.Consumers;
 using Notification.Api.Handlers;
 using Notification.Api.Messaging;
 using RabbitMQ.Client;
+using Serilog;
 using Shared.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, configuration) =>
+{
+    configuration.ReadFrom.Configuration(context.Configuration).WriteTo.Console();
+});
 
 builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetSection("RabbitMq"));
 builder.Services.AddOpenApi();

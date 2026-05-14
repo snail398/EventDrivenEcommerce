@@ -8,9 +8,17 @@ using Order.Api.Repositories;
 using Order.Api.Services;
 using Order.Api.Workers;
 using RabbitMQ.Client;
+using Serilog;
 using Shared.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, configuration) =>
+{
+    configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .WriteTo.Console();
+});
 
 builder.Services.AddDbContext<OrderDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres")));
 

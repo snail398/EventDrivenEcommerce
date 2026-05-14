@@ -4,9 +4,16 @@ namespace Notification.Api.Handlers;
 
 public sealed class ProductCreatedHandler
 {
+    private readonly ILogger<ProductCreatedHandler> _logger;
+
+    public ProductCreatedHandler(ILogger<ProductCreatedHandler> logger)
+    {
+        _logger = logger;
+    }
+
     public Task HandleAsync(ProductCreatedEvent message, CancellationToken cancellationToken)
     {
-        Console.WriteLine($"[Notification] Product created: {message.Name} - {message.Price}");
+        _logger.LogInformation("[Notification] Product created: {Name} - {Price}", message.Name, message.Price);
         return Task.CompletedTask;
     }
 }

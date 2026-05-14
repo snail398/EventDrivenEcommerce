@@ -2,9 +2,15 @@ using Microsoft.Extensions.Options;
 using Payment.Api.Consumers;
 using Payment.Api.Handlers;
 using RabbitMQ.Client;
+using Serilog;
 using Shared.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, configuration) =>
+{
+    configuration.ReadFrom.Configuration(context.Configuration).WriteTo.Console();
+});
 
 builder.Services.AddOpenApi();
 builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetSection("RabbitMq"));

@@ -6,12 +6,20 @@ namespace Notification.Api.Messaging;
 
 public sealed class RabbitMqRetryService
 {
+    private readonly ILogger<RabbitMqRetryService> _logger;
+
+    public RabbitMqRetryService(ILogger<RabbitMqRetryService> logger)
+    {
+        _logger = logger;
+    }
+
     public async Task HandleFailureAsync(IChannel channel, BasicDeliverEventArgs args, CancellationToken cancellationToken)
     {
         var retryCount = GetRetryCount(args);
 
         if (retryCount >= RabbitMqTopology.MaxRetryCount)
         {
+            _logger.LogWarning("[Notification] Message failed after {RetryCount} attempts.", retryCount);
             await channel.BasicPublishAsync(exchange: RabbitMqTopology.DeadLetterExchange, routingKey: RabbitMqTopology.DeadLetterRoutingKey, body: args.Body, cancellationToken: cancellationToken);
             await channel.BasicAckAsync(args.DeliveryTag, false, cancellationToken);
             return;

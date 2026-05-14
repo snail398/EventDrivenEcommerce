@@ -14,11 +14,13 @@ public sealed class OrderCreatedConsumer : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly RabbitMqOptions _rabbitMqOptions;
+    private readonly ILogger<OrderCreatedConsumer> _logger;
 
-    public OrderCreatedConsumer(IServiceScopeFactory scopeFactory, IOptions<RabbitMqOptions> rabbitMqOptions)
+    public OrderCreatedConsumer(IServiceScopeFactory scopeFactory, IOptions<RabbitMqOptions> rabbitMqOptions, ILogger<OrderCreatedConsumer> logger)
     {
         _scopeFactory = scopeFactory;
         _rabbitMqOptions = rabbitMqOptions.Value;
+        _logger = logger;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -49,7 +51,7 @@ public sealed class OrderCreatedConsumer : BackgroundService
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[Payment] Error: {ex.Message}");
+                _logger.LogError(ex, $"[Payment] Error: {ex.Message}");
                 await channel.BasicNackAsync(args.DeliveryTag, false, requeue: true, stoppingToken);
             }
         };

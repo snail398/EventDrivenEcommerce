@@ -6,10 +6,12 @@ namespace Payment.Api.Handlers;
 public sealed class OrderCreatedHandler
 {
     private readonly RabbitMqPublisher _publisher;
+    private readonly ILogger<OrderCreatedHandler> _logger;
 
-    public OrderCreatedHandler(RabbitMqPublisher publisher)
+    public OrderCreatedHandler(RabbitMqPublisher publisher, ILogger<OrderCreatedHandler> logger)
     {
         _publisher = publisher;
+        _logger = logger;
     }
 
     public async Task HandleAsync(OrderCreatedEvent message, CancellationToken cancellationToken)
@@ -20,12 +22,12 @@ public sealed class OrderCreatedHandler
         {
             var @event = new PaymentSucceededEvent(message.OrderId);
             await _publisher.PublishAsync("payment.events", "payment.succeeded", @event, cancellationToken);
-            Console.WriteLine($"[Payment] Payment succeeded for order {message.OrderId}");
+            _logger.LogInformation("Payment succeeded for order {OrderId}", message.OrderId);
             return;
         }
 
         var failedEvent = new PaymentFailedEvent(message.OrderId, "Payment was declined.");
         await _publisher.PublishAsync("payment.events", "payment.failed", failedEvent, cancellationToken);
-        Console.WriteLine($"[Payment] Payment failed for order {message.OrderId}");
+        _logger.LogInformation("Payment failed for order {OrderId}", message.OrderId);
     }
 }
