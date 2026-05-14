@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using Order.Api.Consumers;
 using Order.Api.Data;
 using Order.Api.Endpoints;
+using Order.Api.Handlers;
 using Order.Api.Repositories;
 using Order.Api.Services;
 using Shared.Messaging;
@@ -16,6 +18,9 @@ builder.Services.AddSingleton<RabbitMqPublisher>();
 
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<OrderService>();
+builder.Services.AddScoped<PaymentEventHandler>();
+
+builder.Services.AddHostedService<PaymentEventConsumer>();
 
 var app = builder.Build();
 

@@ -15,6 +15,12 @@ public static class OrderEndpoints
             return Results.Created($"/api/v1/orders/{order.Id}", order);
         });
 
+        group.MapGet("/{id:guid}", async (Guid id, OrderService service, CancellationToken cancellationToken) =>
+        {
+            var order = await service.GetByIdAsync(id, cancellationToken);
+            return order is null ? Results.NotFound() : Results.Ok(order);
+        });
+    
         return app;
     }
 }

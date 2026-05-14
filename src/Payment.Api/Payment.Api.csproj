@@ -4,27 +4,17 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>1047b88c-8605-415a-ae02-b2aadb756756</UserSecretsId>
+    <UserSecretsId>92aaa878-f2d7-48be-a402-19f9c95ca93d</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.5" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
     <PackageReference Include="RabbitMQ.Client" Version="7.2.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Shared.Contracts\Shared.Contracts.csproj" />
     <ProjectReference Include="..\Shared.Messaging\Shared.Messaging.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Handlers\" />
   </ItemGroup>
 
 </Project>
