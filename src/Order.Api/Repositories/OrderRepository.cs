@@ -20,10 +20,15 @@ public sealed class OrderRepository : IOrderRepository
         return order;
     }
 
-    public async Task AddWithOutboxMessageAsync(CustomerOrder order, OutboxMessage outboxMessage, CancellationToken cancellationToken)
+    public async Task AddWithOutboxMessageAsync(CustomerOrder order, OutboxMessage outboxMessage, IdempotencyRecord? idempotencyRecord, CancellationToken cancellationToken)
     {
         _dbContext.Orders.Add(order);
         _dbContext.OutboxMessages.Add(outboxMessage);
+
+        if (idempotencyRecord is not null)
+        {
+            _dbContext.IdempotencyRecords.Add(idempotencyRecord);
+        }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
@@ -36,5 +41,10 @@ public sealed class OrderRepository : IOrderRepository
     public async Task UpdateAsync(CustomerOrder order, CancellationToken cancellationToken)
     {
         await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<IdempotencyRecord?> GetIdempotencyRecordAsync(string key, CancellationToken cancellationToken)
+    {
+        return await _dbContext.IdempotencyRecords.FirstOrDefaultAsync(x => x.Key == key, cancellationToken);
     }
 }

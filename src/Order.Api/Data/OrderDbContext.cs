@@ -9,4 +9,12 @@ public sealed class OrderDbContext : DbContext
 
     public DbSet<CustomerOrder> Orders => Set<CustomerOrder>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+    public DbSet<IdempotencyRecord> IdempotencyRecords => Set<IdempotencyRecord>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<IdempotencyRecord>()
+            .HasIndex(x => x.Key)
+            .IsUnique();
+    }
 }

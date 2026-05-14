@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Order.Api.DTO.Orders;
+using Order.Api.Exceptions;
 using Order.Api.Models;
 using Order.Api.Repositories;
 using Shared.Contracts.Events;
@@ -15,8 +16,30 @@ public sealed class OrderService
         _orderRepository = orderRepository;
     }
 
-    public async Task<CustomerOrder> CreateAsync(CreateOrderRequest request, string correlationId, CancellationToken cancellationToken)
+    public async Task<CustomerOrder> CreateAsync(CreateOrderRequest request, string correlationId, string? idempotencyKey, string requestHash, CancellationToken cancellationToken)
     {
+        if (!string.IsNullOrWhiteSpace(idempotencyKey))
+        {
+            var existingRecord = await _orderRepository.GetIdempotencyRecordAsync(idempotencyKey, cancellationToken);
+
+            if (existingRecord is not null)
+            {
+                if (existingRecord.RequestHash != requestHash)
+                {
+                    throw new IdempotencyConflictException();
+                }
+
+                var existingOrder = JsonSerializer.Deserialize<CustomerOrder>(existingRecord.ResponseBody);
+
+                if (existingOrder is null)
+                {
+                    throw new InvalidOperationException("Stored idempotency response could not be deserialized.");
+                }
+
+                return existingOrder;
+            }
+        }
+
         var order = new CustomerOrder
         {
             Id = Guid.NewGuid(),
@@ -40,7 +63,22 @@ public sealed class OrderService
             OccurredOnUtc = DateTime.UtcNow
         };
 
-        await _orderRepository.AddWithOutboxMessageAsync(order, outboxMessage, cancellationToken);
+        IdempotencyRecord? idempotencyRecord = null;
+
+        if (!string.IsNullOrWhiteSpace(idempotencyKey))
+        {
+            idempotencyRecord = new IdempotencyRecord
+            {
+                Id = Guid.NewGuid(),
+                Key = idempotencyKey,
+                RequestHash = requestHash,
+                ResponseBody = JsonSerializer.Serialize(order),
+                StatusCode = StatusCodes.Status201Created,
+                CreatedOnUtc = DateTime.UtcNow
+            };
+        }
+
+        await _orderRepository.AddWithOutboxMessageAsync(order, outboxMessage, idempotencyRecord, cancellationToken);
         return order;
     }
 

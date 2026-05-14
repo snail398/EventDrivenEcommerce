@@ -15,3 +15,42 @@ GET {{Order.Api_HostAddress}}/api/v1/orders/5169c62c-886a-4171-a29b-511717d86b71
 
 ###
 GET {{Order.Api_HostAddress}}/api/v1/orders/debug/outbox
+
+
+@IdempotencyKey = order-create-test-001
+
+### Create order with idempotency key
+POST {{Order.Api_HostAddress}}/api/v1/orders
+X-Correlation-Id: test-idempotency-001
+Idempotency-Key: {{IdempotencyKey}}
+Content-Type: application/json
+
+{
+  "productId": "11111111-1111-1111-1111-111111111111",
+  "quantity": 2,
+  "unitPrice": 129.99
+}
+
+### Repeat same request with same key
+POST {{Order.Api_HostAddress}}/api/v1/orders
+X-Correlation-Id: test-idempotency-001-repeat
+Idempotency-Key: {{IdempotencyKey}}
+Content-Type: application/json
+
+{
+  "productId": "11111111-1111-1111-1111-111111111111",
+  "quantity": 2,
+  "unitPrice": 129.99
+}
+
+### Same key, different body - should return 409
+POST {{Order.Api_HostAddress}}/api/v1/orders
+X-Correlation-Id: test-idempotency-001-conflict
+Idempotency-Key: {{IdempotencyKey}}
+Content-Type: application/json
+
+{
+  "productId": "11111111-1111-1111-1111-111111111111",
+  "quantity": 3,
+  "unitPrice": 129.99
+}

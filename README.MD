@@ -2,6 +2,16 @@
 
 Pet project for practicing production-style backend development with ASP.NET Core, PostgreSQL, RabbitMQ, Docker, Outbox Pattern, idempotent consumers and structured logging.
 
+## ⭐ Highlights
+
+- Event-driven microservices architecture
+- Reliable messaging with Outbox Pattern
+- RabbitMQ with retry and dead-letter queues
+- Idempotent event consumers
+- CorrelationId-based distributed tracing
+- Dockerized multi-service system
+- Order create idempotency
+
 ## Services
 
 - Catalog.Api
@@ -15,7 +25,7 @@ Pet project for practicing production-style backend development with ASP.NET Cor
 - RabbitMQ
 - Docker Compose
 
-## Main Flow dasd
+## Main Flow
 
 POST /api/v1/orders
 ↓
