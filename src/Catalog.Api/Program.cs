@@ -3,6 +3,8 @@ using Catalog.Api.Endpoints;
 using Catalog.Api.Repositories;
 using Catalog.Api.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using RabbitMQ.Client;
 using Shared.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +20,15 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<ProductService>();
+
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<CatalogDbContext>()
+    .AddRabbitMQ(async serviceProvider =>
+    {
+        var options = serviceProvider.GetRequiredService<IOptions<RabbitMqOptions>>().Value;
+        var factory = new ConnectionFactory { HostName = options.HostName, UserName = options.UserName, Password = options.Password };
+        return await factory.CreateConnectionAsync();
+    });
 
 var app = builder.Build();
 
@@ -35,5 +46,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.MapProductEndpoints();
+app.MapHealthChecks("/health");
 
 app.Run();
