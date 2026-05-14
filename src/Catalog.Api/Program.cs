@@ -35,6 +35,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<CatalogDbContext>();
+    await dbContext.Database.MigrateAsync();
     await CatalogDbSeeder.SeedAsync(dbContext);
 }
 
